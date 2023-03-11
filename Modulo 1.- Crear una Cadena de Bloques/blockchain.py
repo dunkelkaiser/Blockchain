@@ -30,7 +30,7 @@ class Blockchain:
         self.chain.append(block)
         return block
     
-    def get_previous_hash(self):
+    def get_previous_block(self):
         return self.chain[-1]
     
     def proof_of_woork(self, previous_proof):
@@ -72,6 +72,32 @@ app = Flask(__name__)
 
 # Crear una blockchain
 blockchain = Blockchain()
+
+# Minar un nuevo bloque 
+@app.route("/mine_block", methods=['GET'])
+def mine_block():
+    previous_block = blockchain.get_previous_block()
+    previous_proof = previous_block['previous_proof']
+    proof = blockchain.proof_of_woork(previous_proof)
+    previous_hash = blockchain.hash(previous_block)
+    block = blockchain.create_block(proof, previous_hash)
+    response = {'message': "¡Enhorabuena, has minado un nuevo bloque!",
+                'index': block['index'],
+                'timestamp': block['timestamp'],
+                'proof': block['proof'],
+                'previous_hash': block['previous_hash']
+        }
+    return jsonify(response), 200
+
+# Obtener la cadena de bloques
+@app.route("/get_chain", methods=['GET'])
+def get_chain():
+    response = {'chain': blockchain.chain,
+                'length': len(blockchain.chain)}
+    return jsonify(response), 200
+
+
+
 
 
 
